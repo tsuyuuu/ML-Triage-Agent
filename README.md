@@ -3,6 +3,15 @@ AI Security Triage Agent built with Ollama Cloud for CYBERSEC590:
 ML in Modern Cyber Operations at Duke University. 
 
 **Team:** Parker Cummins, Lalit Lakamsani, Jenessa Lu, Vamsee Vusuwandla
+
+## Member Contributions
+Parker: Created workflow diagram, rag search function <br />
+Vamsee: Assisted with document creation, defining evaluation tables, wrote generate_report function <br />
+Jenessa: Wrote cisa_kev function, general guidance on how to move through project. <br />
+Lalit: Assisted with document creation, wrote generate_report function. <br />
+
+Everyone: Wrote system prompt, came up with ideas for how to go about the project/writing overall code
+
 ## Overview
 
 This project uses **Ollama Cloud (`gpt-oss:20b`)**, LangChain tool calling, and Python to investigate one security question in a **simulated** Windows enterprise: **What is the risk of SMB signing not being required on FILE04 at Northbridge Services?**
