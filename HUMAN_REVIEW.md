@@ -42,10 +42,10 @@ The available evidence confirms that SMB signing is not required on FILE04, but 
 
 | Assessment Component | Agent Output | Reviewer Decision |
 |---|---|---|
-| Attack applicability | Insufficient Evidence | Pending |
-| Business impact | Departmental (provisional) | Pending |
-| Final risk rating | Insufficient Evidence | Pending |
-| Recommended actions | Verify SMB reachability, signing behavior, relay prerequisites, and share permissions | Pending |
+| Attack applicability | Insufficient Evidence | True |
+| Business impact | Departmental (provisional) | True |
+| Final risk rating | Insufficient Evidence | True |
+| Recommended actions | Verify SMB reachability, signing behavior, relay prerequisites, and share permissions | True |
 
 **Policy justification:** Under the group's applicability-and-impact rating policy, High, Medium, or Low requires adequate evidence of an applicable attack path and its potential business impact. When decisive attack prerequisites are unknown, the appropriate decision is **Insufficient Evidence**, rather than assuming exploitability.
 
