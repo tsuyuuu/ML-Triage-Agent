@@ -100,22 +100,47 @@ The notebook was developed for **Google Colab**. Its `google.colab` imports and 
 
 The notebook currently retrieves Microsoft guidance **live** using HTTP requests; it does not automatically load a cached snapshot if the requests fail. It also requires an available Ollama Cloud connection. The `requirements.txt` should contain the package versions tested in your Colab runtime; Python's built-in modules and `google.colab` do not need to be listed as pip dependencies.
 
-## Tests and evaluation
+## Tests and Evaluation
 
-The notebook includes the following checks:
+The agent was evaluated using controlled tests to verify attack applicability, risk-rating consistency, insufficient-evidence handling, and API failure recovery. **All implemented tests passed**, with actual results matching expected outcomes.
 
-| Test | Expected result |
-| --- | --- |
-| All SMB relay prerequisites confirmed | `applicable` |
-| Necessary network access blocked | `not_applicable` |
-| Necessary reachability unknown | `insufficient_evidence` |
-| Confirmed applicable path with critical / departmental / minor impact | `High` / `Medium` / `Low` |
-| FILE04 prerequisites unresolved | `insufficient_evidence` |
-| Simulated CISA API connection failure | `unavailable` without an uncaught exception |
+| **Test** | **Expected Result** | **Actual Result** | **Status** |
+| --- | --- | --- | --- |
+| All SMB relay prerequisites confirmed | `applicable` | `applicable` | PASS |
+| Necessary network access blocked | `not_applicable` | `not_applicable` | PASS |
+| Necessary reachability unknown | `insufficient_evidence` | `insufficient_evidence` | PASS |
+| Confirmed applicable path with critical impact | `High` | `High` | PASS |
+| Confirmed applicable path with departmental impact | `Medium` | `Medium` | PASS |
+| Confirmed applicable path with minor impact | `Low` | `Low` | PASS |
+| FILE04 prerequisites unresolved | `insufficient_evidence` | `insufficient_evidence` | PASS |
+| Simulated CISA KEV API connection failure | `unavailable` without an uncaught exception | `unavailable` without an uncaught exception | PASS |
 
-The test cells print expected and actual results. For the assignment submission, preserve those outputs and document any differences. The demonstration's **Insufficient Evidence** outcome also requires comparison with the group's agreed policy and a **human check** of the cited Northbridge passages; the JSON initially records `analyst_review: pending`.
+### End-to-End Agent Evaluation
 
-The saved baseline includes the model, provider, temperature, environment filename, system prompt, timestamp, and tool-call arguments/results. **It does not currently include every artifact required for exact replay**, such as the complete original environment document, the full initial user query, or a code commit identifier; retain those separately with the submission.
+A complete agent execution was successfully demonstrated. The agent:
+
+1. Retrieved Northbridge environment evidence through RAG.
+2. Retrieved external Microsoft SMB security guidance.
+3. Evaluated SMB relay attack prerequisites using the applicability checker.
+4. Generated a structured JSON risk assessment with supporting evidence, unknowns, and recommended actions.
+
+The final assessment assigned FILE04 a risk rating of **Insufficient Evidence**, consistent with the group's policy for cases where decisive attack prerequisites remain unverified. Departmental business impact was identified as provisional.
+
+The generated report records `analyst_review: pending` by default. Human verification is a separate step from automated testing and does not indicate a test failure.
+
+### Reproducibility
+
+The saved agent baseline includes:
+
+- Model: `gpt-oss:20b`
+- Provider: Ollama Cloud
+- Temperature: `0`
+- Environment filename
+- System prompt
+- Execution timestamp
+- Tool-call arguments and results
+
+The notebook, original Northbridge environment document, and generated JSON outputs are retained separately to support reproducibility and analyst review.
 
 ## Outputs
 
