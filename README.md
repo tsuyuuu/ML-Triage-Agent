@@ -152,15 +152,7 @@ Do not commit API keys or other secrets.
 
 ### Dependency versions and configuration
 
-Python and package versions depend on the Colab runtime. For reproducibility, record the actual environment used for the final run:
-
-```python
-import sys
-print(sys.version)
-!pip freeze > requirements-lock.txt
-```
-
-Include `requirements-lock.txt` with the submission. The model recorded in the saved baseline is `gpt-oss:20b`; the baseline does not independently establish the exact library versions or all model settings.
+Python and package versions depend on the Colab runtime. At the time of development, Python 3.13.16 was used. 
 
 ## Demonstrated result
 
@@ -184,23 +176,6 @@ Individual function tests were run in Colab and were reported as passing. They c
 3. **Missing evidence** — unknown decisive prerequisites result in insufficient evidence.
 4. **Controlled failure** — a simulated unavailable CISA KEV API is handled without an uncaught crash.
 
-**Before submission:** Add the actual **expected-versus-actual results and pass/fail evidence** from the notebook. The saved baseline documents the successful assessment, not all four standalone test outputs. Testing of the *entire agent's* behavior during an external-tool failure is a separate limitation if only the KEV function was unit-tested.
-
-## Files and artifacts
-
-| File | Description |
-| --- | --- |
-| Project notebook (`.ipynb`; add before submission) | Imports, model setup, tools, agent loop, tests |
-| `Windows_Enterprise_Environment.docx` | Original simulated enterprise scenario |
-| `microsoft_smb_guidance.json` | Saved external guidance passages, source URLs, and retrieval timestamps |
-| `risk_assessment.json` | Final structured FILE04 assessment |
-| `agent_baseline.json` | Model/provider details and ordered tool requests/results |
-| `README.md` | Setup, architecture, results, limitations and disclosures |
-| Design/architecture diagram (add before submission) | Workflow, decision points, tool contracts, and analyst review |
-| Test results (add before submission) | Expected-versus-actual policy checks and controlled failure |
-
-Use consistent filenames when copying the final downloaded files into the repository (the browser may add `(1)` or `(2)` to duplicate downloads). Keep the same successful report and baseline together.
-
 ## Limitations and analyst review
 
 - This is a simulated exercise, **not** a live network scan or an exploitation finding.
@@ -210,12 +185,6 @@ Use consistent filenames when copying the final downloaded files into the reposi
 - The Microsoft guidance snapshot includes some duplicate and page-navigation text; preserving an unchanged original plus a separately cleaned copy would improve future retrieval.
 - The KEV catalog is relevant only to specific CVEs; absence from KEV does **not** mean a weakness is safe.
 - The reporter's provisional departmental impact and the `not_applicable` → Low mapping should be treated as documented policy limitations.
-
-## Team contributions
-
-**Team members:** Parker Cummins, Lalit Lakamsani, Jenessa Lu, Vamsee Vusuwandla.
-
-**Complete before submission:** Record each member's actual responsibilities (e.g., threat selection, architecture/rating policy, tool implementation, testing, evidence review, demo, documentation). Do not assign contributions that have not been confirmed by the team.
 
 ## AI assistance disclosure
 
