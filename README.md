@@ -56,9 +56,9 @@ For an **applicable** attack path with supporting evidence, the reporter assigns
 
 | Impact category | Risk rating |
 | --- | --- |
-| `critical` — critical systems or high-consequence financial/administrative effects | **High** |
-| `departmental` — bounded departmental effects | **Medium** |
-| `minor` — limited consequences | **Low** |
+| `critical` — critical systems or high-consequence financial/administrative effects | High |
+| `departmental` — bounded departmental effects | Medium |
+| `minor` — limited consequences | Low |
 
 If evidence is missing or applicability is `insufficient_evidence`, the reporter returns **Insufficient Evidence**. If applicability is `not_applicable`, it returns **Not Applicable**, **not Low**. The final assessment must be reviewed against the group's documented policy and supporting evidence.
 
