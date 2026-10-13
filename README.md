@@ -3,188 +3,141 @@ AI Security Triage Agent built with Ollama Cloud for CYBERSEC590:
 ML in Modern Cyber Operations at Duke University. 
 
 **Team:** Parker Cummins, Lalit Lakamsani, Jenessa Lu, Vamsee Vusuwandla
-
 ## Overview
 
-This project implements a Python-based, Ollama-powered security triage 
-agent that assesses the potential risk of an **SMB relay attack against 
-FILE04** in the fictional **Northbridge Services** Windows enterprise 
-environment. The agent retrieves internal environment evidence and external 
-Microsoft SMB guidance, checks attack prerequisites, and produces a structured, 
-evidence-supported risk assessment for analyst review.
+This project uses **Ollama Cloud (`gpt-oss:20b`)**, LangChain tool calling, and Python to investigate one security question in a **simulated** Windows enterprise: **What is the risk of SMB signing not being required on FILE04 at Northbridge Services?**
 
-The project assesses **one defined weakness**, not the security of the 
-entire enterprise. All Northbridge records are **simulated teaching data**; 
-no real enterprise scan or exploitation was performed.
+The agent retrieves environment evidence and Microsoft SMB guidance, evaluates prerequisites for a potential SMB relay attack, and saves a JSON assessment for human review. This is an **evidence-based triage exercise**, not a vulnerability scan or proof of exploitation.
 
 ## Assessment scope
 
-**Risk Question:** What risk does SMB signing not being required on FILE04 
-pose to Northbridge Services, considering potential SMB relay attacks, network 
-access restrictions, and business impact?
+The supplied Northbridge environment documents the following:
 
-- **Target:** FILE04 in the W05 file-server group (Windows Server 2022, SMB 3).
-- **Confirmed configuration:** SMB signing is not *required* on FILE04; SMB1 is disabled across W05 (W05, S03). This does **not** prove every session is unsigned.
-- **Network context:** No Internet-facing SMB; inter-zone network access is denied by default unless permitted (S02).
-- **Unresolved:** Internal attacker reachability, authentication-relay prerequisites, unsigned SMB negotiation, FILE04's exact data classification and share permissions.
+- **FILE04** belongs to the **W05 file-server group** (Windows Server 2022, SMB 3).
+- SMB signing is **not required** on FILE04; SMB1 is disabled across W05 (**W05, S03**). *Not required* does not mean every SMB session is unsigned.
+- No SMB service is exposed to the public internet, and inter-zone traffic is denied by default unless explicitly allowed (**S02**).
+- The evidence does **not** establish internal attacker reachability to FILE04, authentication-relay prerequisites, whether an unsigned connection can be negotiated, or the classification and permissions of FILE04's shares.
 
-The environment is fictional and simulated. The project does not scan,
-exploit, or modify a real network. Suggested verification activities in
-the assessment are recommendations, not actions performed by the agent.
+The scenario describes departmental shares at the W05 **group** level. It does not establish that Finance or HR data specifically resides on FILE04.
 
-## Architecture
+## How it works
 
-The implementation uses:
+1. Load and extract text from the Northbridge Word document.
+2. Retrieve current Microsoft SMB signing and security-hardening documentation.
+3. Use TF-IDF and cosine similarity to retrieve relevant passages from the environment or guidance collection.
+4. Let the LLM request registered tools; Python validates, executes, and returns their results to the model.
+5. Evaluate SMB relay prerequisites without treating unknown conditions as confirmed.
+6. Generate `risk_assessment.json` and preserve the run's tool calls and outputs.
 
-- **Ollama Cloud:** `gpt-oss:20b`.
-- **Python and LangChain:** tool orchestration and message handling.
-- **TF-IDF and cosine similarity:** retrieval from environment and
-  Microsoft guidance passages.
-- **Python policy functions:** applicability checks and rating assignment.
-- **Manual analyst review:** verification of evidence and the final decision.
+The agent permits up to **10 model iterations**. Tool selection is model-driven, so it is not guaranteed that every possible tool will be called. A run that stops without a successful `generate_report` result is incomplete.
 
-**Workflow:** 
+### Tools
 
-1. Upload and parse the Northbridge Word document.
-2. Retrieve Microsoft SMB signing and hardening documentation.
-3. Let the model select tools and construct arguments.
-4. Execute the requested tools in Python.
-5. Return tool results to the model.
-6. Evaluate applicability and generate the assessment.
-7. Save the assessment and tool history for analyst review.
-
-The agent permits up to 10 model iterations. An iteration may contain
-multiple tool calls. Text-only completion or reaching the limit without
-a report is an incomplete run.
-
-See the design document and workflow PDF for additional detail.
-
-## Tools
-
-| Tool | Purpose | Inputs | Output |
+| Tool | Purpose | Main inputs | Result |
 | --- | --- | --- | --- |
-| `rag_search` | Retrieve evidence from the Northbridge document or saved Microsoft guidance using TF-IDF ranking | `query`, `collection` (`environment`/`guidance`), `top_k` | Ranked passages, sources, retrieval metadata where available |
-| `lookup_cisa_kev` | Check whether a **specific CVE** appears in CISA's Known Exploited Vulnerabilities catalog | `cve_id` | Catalog record, not-listed result, or explicit lookup failure |
-| `check_attack_applicability` | Compare the SMB relay prerequisites supplied from retrieved evidence | Signing requirement, reachability, relay prerequisites, unsigned negotiation (`True`/`False`/`None`) | `applicable`, `not_applicable`, or `insufficient_evidence`, with unknowns |
-| `generate_report` | Apply the group's policy and serialize the final assessment | Asset, threat, applicability, impact, rationale, evidence, unknowns, action | `risk_assessment.json` |
+| `rag_search` | Search environment passages or Microsoft guidance using TF-IDF | `query`, `collection`, `top_k` | Ranked passages, source identifiers/URLs, and retrieval metadata where available |
+| `lookup_cisa_kev` | Look up a specified CVE in CISA's Known Exploited Vulnerabilities catalog | `cve_id` | `found`, `not_listed`, `unavailable`, or validation error |
+| `check_attack_applicability` | Evaluate the prerequisites for the FILE04 SMB relay scenario | SMB signing requirement, attacker reachability, relay prerequisites, unsigned session feasibility | `applicable`, `not_applicable`, or `insufficient_evidence`, with conditions and unknowns |
+| `generate_report` | Apply risk-rating logic and save a structured assessment | Asset, threat, applicability, impact, rationale, evidence, unknowns, actions | `risk_assessment.json` |
 
-CISA KEV is conditional. The configuration-only SMB signing case does
-not require a CVE. A KEV listing does not establish local applicability,
-and absence from KEV does not establish safety.
+**About CISA KEV:** The core FILE04 case is a configuration weakness rather than a claim about a particular CVE, so the successful baseline run does **not** call the KEV tool. The notebook separately tests this tool and includes a CVE-focused investigation using **CVE-2025-33073**. A KEV listing indicates known exploitation of a CVE, **not** that FILE04 is affected; the existing applicability checker evaluates the SMB relay scenario, not CVE-specific patch or version applicability.
 
-## Risk-rating policy
+## Risk-rating logic
 
-Prerequisites are represented as `True`, `False`, or `None`:
+The applicability checker uses `True` (supported), `False` (necessary condition absent), and `None` (unknown):
 
-- `True`: condition supported as present.
-- `False`: necessary condition supported as absent.
-- `None`: condition unknown.
-
-The applicability checker returns:
-
-- `applicable` when all assessed prerequisites are confirmed.
-- `not_applicable` when a necessary prerequisite is confirmed absent.
-- `insufficient_evidence` when unresolved prerequisites remain and none
-  establishes non-applicability.
-
-The group's policy assigns a rating when an attack path is supported by evidence and its potential business impact is 
-identified:
-
-| Applicability and impact | Decision |
+| Applicability | Meaning |
 | --- | --- |
-| Supported path affecting critical services or sensitive financial/administrative data | **High** |
-| Supported path affecting bounded departmental data/services | **Medium** |
-| Supported path with only minor consequences | **Low** |
-| Decisive applicability information is missing or conflicting | **Insufficient Evidence / Review** |
+| `applicable` | All assessed prerequisites are confirmed |
+| `not_applicable` | At least one necessary prerequisite is confirmed absent |
+| `insufficient_evidence` | A decisive prerequisite is unknown, without a confirmed disqualifier |
 
-**Important limitation:** The risk assessment distinguishes a confirmed configuration weakness from a confirmed attack path. For FILE04, SMB signing is not required, but internal reachability, authentication relay prerequisites, and unsigned SMB negotiation remain unverified. Therefore, the agent assigns Insufficient Evidence rather than assuming exploitability. A not_applicable finding is reported separately as Not Applicable, rather than automatically receiving a Low risk rating. Business impact remains provisional until FILE04's data classification and share permissions are verified.
+For an **applicable** attack path with supporting evidence, the reporter assigns a risk rating based on potential business impact:
 
-## Repository files
+| Impact category | Risk rating |
+| --- | --- |
+| `critical` — critical systems or high-consequence financial/administrative effects | **High** |
+| `departmental` — bounded departmental effects | **Medium** |
+| `minor` — limited consequences | **Low** |
 
-| File or Folder | Description |
-|---|---|
-| `ML_Triage_Agent.ipynb` | Google Colab notebook containing the agent implementation, demonstration, and test cells |
-| `ml_triage_agent.py` | Python script version of the agent; Colab-specific functionality may require adaptation for local execution |
-| `Windows_Enterprise_Environment.docx` | Supplied fictional Northbridge Services environment used as input |
-| `TriageAgent WorkflowDiagram.pdf` | Workflow diagram showing tool execution, assessment, reporting, and analyst review |
-| `JSON/` | Saved assessment, baseline, and supporting evidence files |
-| `requirements.txt` | Python dependencies |
-| `README.md` | Project overview, setup instructions, rating policy, testing, and limitations |
-| `LICENSE` | Repository license |
+If evidence is missing or applicability is `insufficient_evidence`, the reporter returns **Insufficient Evidence**. If applicability is `not_applicable`, it returns **Not Applicable**, **not Low**. The final assessment must be reviewed against the group's documented policy and supporting evidence.
 
-Notebook runs generate `risk_assessment.json`, `tool_history.json`,
-`agent_baseline.json`, and `microsoft_smb_guidance.json` in the runtime’s
-working directory. Download and preserve the submission outputs in `JSON/`.
+## Demonstrated FILE04 result
 
-## Setup and execution (Google Colab)
+The preserved successful run executed **four tool calls**: environment `rag_search`, guidance `rag_search`, `check_attack_applicability`, and `generate_report`.
 
-The current notebook is designed for **Google Colab**. It uses
-`google.colab.files` for uploads and downloads and
-`google.colab.userdata` for secrets.
+| Field | Result |
+| --- | --- |
+| Asset | `FILE04` |
+| Threat | Potential SMB relay attack associated with SMB signing not being required |
+| Applicability | `insufficient_evidence` |
+| Final risk rating | **Insufficient Evidence** |
+| Business impact estimate | `departmental` (**provisional**) |
+| Analyst review | `pending` |
 
-Required packages include:
-- `ollama`
-- `langchain-ollama`
-- `langchain-core`
-- `requests`
-- `beautifulsoup4`
-- `python-docx`
-- `scikit-learn`
+**Why:** The signing requirement exception is documented, but an exploitable SMB relay path has **not** been demonstrated. Internal attacker reachability, relay prerequisites, and unsigned SMB negotiation remain unknown. FILE04's share permissions and data classification are also unverified.
 
-1. Open the project notebook (`.ipynb`) in Google Colab. **Add the notebook to this repository before submission.**
-2. Install dependencies used in the notebook:
+**Next steps:** Review internal access paths and firewall policy; verify effective SMB signing configuration and negotiated sessions through authorized methods; investigate authentication-relay prerequisites; and identify the data and permissions on FILE04. These are **recommendations**, not tests or changes performed by the agent.
+
+The report preserves environment evidence references (**W05, S02, S03**) and uncertainty. The run history also preserves the retrieved Microsoft source URLs and timestamps, even when those external sources are not included in the final report's `evidence` list.
+
+## Running in Google Colab
+
+The notebook was developed for **Google Colab**. Its `google.colab` imports and `!pip` commands mean an exported `.py` file is **not directly runnable as a standard Python script** without adaptation.
+
+1. Open `ML_Triage_Agent.ipynb` in Colab.
+2. Install the project dependencies from `requirements.txt`:
 
    ```python
-   !pip install -q langchain-ollama python-docx scikit-learn requests beautifulsoup4
+   !pip install -r requirements.txt
    ```
 
-3. In **Colab → Secrets**, create a secret named `OLLAMA` with your Ollama Cloud API key and grant notebook access. This key should be taken from the free version of the Ollama API service. **Never commit or print the key.**
-4. Configure `ChatOllama` using model `gpt-oss:20b`, the Ollama Cloud endpoint, and the key loaded from Secrets. The API key is authenticated through the notebook's configured authorization header.
-5. Upload `Windows_Enterprise_Environment.docx` using `files.upload()` when prompted. Load the Microsoft guidance collection using the notebook's retrieval code (or the saved evidence snapshot, if the notebook is configured to read it).
-6. Run the cells defining the four tools, bind them to the LLM, and run the `run_agent(...)` cell for the FILE04 SMB question.
-7. Review `risk_assessment.json` and the recorded tool history. The generated assessment is **pending human review**, not an automated remediation instruction.
+3. Create a Colab **Secret** named `OLLAMA`, paste your Ollama Cloud API key, and grant the notebook access. Do **not** include the key in GitHub or saved outputs.
+4. Run the setup cells. The notebook configures `ChatOllama` with `gpt-oss:20b` and `temperature=0`.
+5. When prompted, upload `Windows_Enterprise_Environment.docx`.
+6. Run the retrieval, tool-definition, agent, and evaluation cells in order.
+7. Inspect the generated assessment, tool history, and test output. Preserve the final files for the submission.
 
-The notebook assumes access to Ollama Cloud and that the selected model supports tool calling. Internet access is needed
-for live guidance/KEV lookups. Failed lookups should be reported as unavailable rather than interpreted as evidence of 
-safety.
+The notebook currently retrieves Microsoft guidance **live** using HTTP requests; it does not automatically load a cached snapshot if the requests fail. It also requires an available Ollama Cloud connection. The `requirements.txt` should contain the package versions tested in your Colab runtime; Python's built-in modules and `google.colab` do not need to be listed as pip dependencies.
 
-Do not commit API keys or other secrets.
+## Tests and evaluation
 
-### Dependency versions and configuration
+The notebook includes the following checks:
 
-Python and package versions depend on the Colab runtime. At the time of development, Python 3.13.16 was used. 
+| Test | Expected result |
+| --- | --- |
+| All SMB relay prerequisites confirmed | `applicable` |
+| Necessary network access blocked | `not_applicable` |
+| Necessary reachability unknown | `insufficient_evidence` |
+| Confirmed applicable path with critical / departmental / minor impact | `High` / `Medium` / `Low` |
+| FILE04 prerequisites unresolved | `insufficient_evidence` |
+| Simulated CISA API connection failure | `unavailable` without an uncaught exception |
 
-## Demonstrated result
+The test cells print expected and actual results. For the assignment submission, preserve those outputs and document any differences. The demonstration's **Insufficient Evidence** outcome also requires comparison with the group's agreed policy and a **human check** of the cited Northbridge passages; the JSON initially records `analyst_review: pending`.
 
-The saved successful run reports:
+The saved baseline includes the model, provider, temperature, environment filename, system prompt, timestamp, and tool-call arguments/results. **It does not currently include every artifact required for exact replay**, such as the complete original environment document, the full initial user query, or a code commit identifier; retain those separately with the submission.
 
-- **Asset:** FILE04
-- **Threat:** SMB relay attack
-- **Applicability:** `insufficient_evidence`
-- **Risk rating:** `Insufficient Evidence`
-- **Impact used by the reporter:** `departmental` (**provisional** because the precise FILE04 shares and sensitivity are unknown)
-- **Recommended follow-up:** Verify internal reachability, effective SMB signing behavior, relay prerequisites, and file classifications/share permissions; review appropriate SMB signing enforcement and firewall access rules.
+## Outputs
 
-The saved tool history shows **four executed calls**, in order: environment RAG, Microsoft guidance RAG, applicability checker, and report generator. The last call successfully returned a structured assessment. The current conclusion does **not** assert a confirmed exploitable relay attack.
+The notebook can produce:
 
-## Testing and evaluation
+- `risk_assessment.json` — risk decision, rationale, provisional impact, evidence, unknowns, evidence needed, recommended action, and analyst review state.
+- `tool_history.json` — executed tool names, arguments, and results.
+- `agent_baseline.json` — run metadata and the tool execution history.
+- `microsoft_smb_guidance.json` — retrieved guidance passages, URLs, timestamps, and source modes.
 
-Individual function tests were run in Colab and were reported as passing. They cover:
+Files are written to the Colab working directory and must be downloaded or copied into the submission repository deliberately. Keep generated outputs from the **same completed run** together; individual reporter tests can overwrite `risk_assessment.json` unless it is restored afterward.
 
-1. **Applicability changes** — confirmed vs blocked vs unknown prerequisites.
-2. **Impact changes** — critical, departmental, and minor consequences under confirmed applicability.
-3. **Missing evidence** — unknown decisive prerequisites result in insufficient evidence.
-4. **Controlled failure** — a simulated unavailable CISA KEV API is handled without an uncaught crash.
+## Limitations
 
-## Limitations and analyst review
-
-- This is a simulated exercise, **not** a live network scan or an exploitation finding.
-- The RAG implementation uses TF-IDF; it may rank headings or tangential passages highly. It does not validate truth or completeness.
-- LLM-supplied applicability inputs and report citations are not automatically verified against every original source. A human must check them.
-- Internal FILE04 reachability, effective unsigned session negotiation, authentication-relay conditions, and exact share sensitivity remain unresolved.
-- The Microsoft guidance snapshot includes some duplicate and page-navigation text; preserving an unchanged original plus a separately cleaned copy would improve future retrieval.
-- The KEV catalog is relevant only to specific CVEs; absence from KEV does **not** mean a weakness is safe.
-- The reporter's provisional departmental impact and the `not_applicable` → Low mapping should be treated as documented policy limitations.
+- Northbridge is **simulated**. The agent performs no live enterprise scanning, authentication testing, exploitation, or remediation.
+- TF-IDF retrieval can surface tangential passages; citations and LLM-generated claims are **not automatically validated** against the original sources.
+- The applicability tool is tailored to this SMB relay scenario, not a general CVE applicability engine.
+- Missing prerequisites produce an **Insufficient Evidence** decision even though the configuration exception itself is confirmed.
+- Departmental impact is **provisional**, pending FILE04-specific data classification and share-permission evidence.
+- External guidance scraping can include duplicated or page-navigation text; failed live retrieval is not currently replaced by an automatic cached fallback.
+- The model may stop early without completing every tool call; completion must be verified from the saved history.
+- An analyst must review the final rating and source evidence before relying on it.
 
 ## AI assistance disclosure
 
