@@ -71,8 +71,8 @@ The preserved successful run executed **four tool calls**: environment `rag_sear
 | Asset | `FILE04` |
 | Threat | Potential SMB relay attack associated with SMB signing not being required |
 | Applicability | `insufficient_evidence` |
-| Final risk rating | **Insufficient Evidence** |
-| Business impact estimate | `departmental` (**provisional**) |
+| Final risk rating | Insufficient Evidence |
+| Business impact estimate | `departmental` (provisional) |
 | Analyst review | `pending` |
 
 **Why:** The signing requirement exception is documented, but an exploitable SMB relay path has **not** been demonstrated. Internal attacker reachability, relay prerequisites, and unsigned SMB negotiation remain unknown. FILE04's share permissions and data classification are also unverified.
