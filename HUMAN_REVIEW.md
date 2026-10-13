@@ -14,10 +14,10 @@
 
 | Evidence | Agent Finding | Human Verification |
 |---|---|---|
-| W05 — File Servers | SMB signing is not required on FILE04; SMB1 is disabled across W05. | Pending |
-| S02 — Network Controls | No Internet-facing SMB; default-deny inter-zone network policy. | Pending |
-| S03 — Control Exceptions | FILE04 is an exception where SMB signing is not required. | Pending |
-| Microsoft SMB Signing Guidance | SMB signing provides message integrity and mitigates SMB relay attacks. | Pending |
+| W05 — File Servers | SMB signing is not required on FILE04; SMB1 is disabled across W05. | Verified Correct |
+| S02 — Network Controls | No Internet-facing SMB; default-deny inter-zone network policy. | Verified Correrct |
+| S03 — Control Exceptions | FILE04 is an exception where SMB signing is not required. | Verified Correct |
+| Microsoft SMB Signing Guidance | SMB signing provides message integrity and mitigates SMB relay attacks. | Verified Correct |
 
 **Source documents:**
 - `Windows_Enterprise_Environment.docx`
