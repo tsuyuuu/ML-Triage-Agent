@@ -97,10 +97,7 @@ identified:
 | Supported path with only minor consequences | **Low** |
 | Decisive applicability information is missing or conflicting | **Insufficient Evidence / Review** |
 
-**Important limitation:** The implemented reporter currently maps `not_applicable` to **Low**. This is a policy
-simplification requiring explicit group justification or revision before relying on a non-applicability result; it is not
-exercised by the demonstrated FILE04 run. A configuration weakness can be confirmed even when the complete SMB relay attack
-path is unknown.
+**Important limitation:** The risk assessment distinguishes a confirmed configuration weakness from a confirmed attack path. For FILE04, SMB signing is not required, but internal reachability, authentication relay prerequisites, and unsigned SMB negotiation remain unverified. Therefore, the agent assigns Insufficient Evidence rather than assuming exploitability. A not_applicable finding is reported separately as Not Applicable, rather than automatically receiving a Low risk rating. Business impact remains provisional until FILE04's data classification and share permissions are verified.
 
 ## Repository files
 
