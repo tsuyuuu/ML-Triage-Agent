@@ -1,0 +1,56 @@
+{
+    "asset_id": "FILE04",
+    "threat": "SMB signing not required on FILE04 may allow a SMB relay attack if an attacker can reach the server, the relay prerequisites are met, and an unsigned connection can be negotiated. This could enable credential theft or unauthorized file access.",
+    "applicability": {
+        "status": "insufficient_evidence",
+        "evidence_sufficient": false
+    },
+    "business_impact": {
+        "level": "departmental",
+        "provisional": true
+    },
+    "risk_rating": "Insufficient Evidence",
+    "rating_policy": "Northbridge applicability and impact policy",
+    "rationale": "The evidence confirms that SMB signing is not required on FILE04 (W05, S03) and that there is no internet-facing SMB service (S02). However, key prerequisites for a SMB relay attack\u2014such as internal attacker reachability, the presence of relay services, and the ability to negotiate an unsigned connection\u2014are unknown. Without these, we cannot determine whether a relay attack is feasible. The data classification and share permissions of FILE04 are also unknown, so the potential business impact cannot be definitively assessed. Consequently, the assessment is insufficient evidence to confirm an attack path or to assign a definitive risk level.",
+    "evidence": [
+        {
+            "description": "File servers in W05: SMB signing not required on FILE04",
+            "id": "W05",
+            "source": "Windows_Enterprise_Environment.docx"
+        },
+        {
+            "description": "No internet-facing SMB service on FILE04",
+            "id": "S02",
+            "source": "Windows_Enterprise_Environment.docx"
+        },
+        {
+            "description": "SMB signing not required on FILE04 within W05",
+            "id": "S03",
+            "source": "Windows_Enterprise_Environment.docx"
+        }
+    ],
+    "unknowns": [
+        "Internal SMB reachability to FILE04",
+        "Authentication relay prerequisites",
+        "Unsigned SMB connection negotiation capability",
+        "Data classification of FILE04",
+        "Share permissions of FILE04"
+    ],
+    "evidence_needed": [
+        {
+            "description": "Internal attacker reachability to FILE04"
+        },
+        {
+            "description": "Authentication relay prerequisites (e.g., presence of SMB relay services, valid credentials, etc.)"
+        },
+        {
+            "description": "Whether an unsigned SMB connection can actually be negotiated"
+        },
+        {
+            "description": "Data classification and share permissions of FILE04"
+        }
+    ],
+    "recommended_action": "Conduct internal network reachability tests to confirm whether an attacker can reach FILE04. Verify whether SMB relay services or other authentication relay prerequisites exist on the network. Test whether unsigned SMB connections can be negotiated. Review firewall rules, SMB configuration, and share permissions to ensure that only authorized users have access to FILE04. Consider enabling SMB signing or enforcing signing on all file servers if the business impact warrants it.",
+    "analyst_review": "pending",
+    "generated_at": "2026-10-13T19:39:26.450453+00:00"
+}
