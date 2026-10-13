@@ -7,14 +7,14 @@ Original file is located at
     https://colab.research.google.com/drive/1_CZu-vEemJMuL4fBdU93b4yvqrHNiT41
 """
 
-!python --version
+# !python --version
 
-# install python packages
-!pip install ollama requests
-!pip install langchain-ollama
-!pip install -q langchain-ollama
-!pip install -q python-docx
-!pip install -q requests beautifulsoup4
+# # install python packages
+# !pip install ollama requests
+# !pip install langchain-ollama
+# !pip install -q langchain-ollama
+# !pip install -q python-docx
+# !pip install -q requests beautifulsoup4
 
 # imports
 import json
@@ -33,6 +33,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timezone
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from pathlib import Path
 
 # Load Ollama API key from Colab Secrets
 API_KEY = userdata.get("OLLAMA")
@@ -856,8 +857,6 @@ for test in applicability_tests:
     print("-" * 40)
 
 # Test 2: Verify risk ratings across business impact levels
-
-from pathlib import Path
 
 report_path = Path("risk_assessment.json")
 original_report = report_path.read_bytes() if report_path.exists() else None
