@@ -14,10 +14,10 @@
 
 | Evidence | Agent Finding | Human Verification |
 |---|---|---|
-| W05 — File Servers | SMB signing is not required on FILE04; SMB1 is disabled across W05. | Verified Correct |
-| S02 — Network Controls | No Internet-facing SMB; default-deny inter-zone network policy. | Verified Correct |
-| S03 — Control Exceptions | FILE04 is an exception where SMB signing is not required. | Verified Correct |
-| Microsoft SMB Signing Guidance | SMB signing provides message integrity and mitigates SMB relay attacks. | Verified Correct |
+| W05 — File Servers | SMB signing is not required on FILE04; SMB1 is disabled across W05. | Approved |
+| S02 — Network Controls | No Internet-facing SMB; default-deny inter-zone network policy. | Approved |
+| S03 — Control Exceptions | FILE04 is an exception where SMB signing is not required. | Approved |
+| Microsoft SMB Signing Guidance | SMB signing provides message integrity and mitigates SMB relay attacks. | Approved |
 
 **Source documents:**
 - `Windows_Enterprise_Environment.docx`
@@ -42,26 +42,26 @@ The available evidence confirms that SMB signing is not required on FILE04, but 
 
 | Assessment Component | Agent Output | Reviewer Decision |
 |---|---|---|
-| Attack applicability | Insufficient Evidence | True |
-| Business impact | Departmental (provisional) | True |
-| Final risk rating | Insufficient Evidence | True |
-| Recommended actions | Verify SMB reachability, signing behavior, relay prerequisites, and share permissions | True |
+| Attack applicability | Insufficient Evidence | Approved |
+| Business impact | Departmental (provisional) | Approved |
+| Final risk rating | Insufficient Evidence | Approved |
+| Recommended actions | Verify SMB reachability, signing behavior, relay prerequisites, and share permissions | Approved |
 
 **Policy justification:** Under the group's applicability-and-impact rating policy, High, Medium, or Low requires adequate evidence of an applicable attack path and its potential business impact. When decisive attack prerequisites are unknown, the appropriate decision is **Insufficient Evidence**, rather than assuming exploitability.
 
 ## 5. Review Outcome
 
-- **Evidence references verified:** [Yes / No]
-- **Risk rating consistent with group policy:** [Yes / No]
-- **Unknowns appropriately preserved:** [Yes / No]
-- **Recommended actions supported by findings:** [Yes / No]
-- **Corrections required:** [None / Describe corrections]
-- **Final review status:** [Approved / Revisions Required]
+- **Evidence references verified:** [Yes]
+- **Risk rating consistent with group policy:** [Yes]
+- **Unknowns appropriately preserved:** [Yes]
+- **Recommended actions supported by findings:** [Yes]
+- **Corrections required:** [None]
+- **Final review status:** [Approved]
 
 **Reviewer comments:**
-
+N/A
 [Enter the reviewer's findings, corrections, or confirmation.]
 
-**Reviewed by:** [Name]
+**Reviewed by:** [Lalit Lakamsani]
 
-**Date:** [Date]
+**Date:** [10/13/2026]
