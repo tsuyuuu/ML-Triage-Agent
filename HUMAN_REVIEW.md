@@ -59,8 +59,8 @@ The available evidence confirms that SMB signing is not required on FILE04, but 
 - **Final review status:** [Approved]
 
 **Reviewer comments:**
-N/A
-[Enter the reviewer's findings, corrections, or confirmation.]
+N/A. Everything looks appropriate! Well documented and explained.
+
 
 **Reviewed by:** [Lalit Lakamsani]
 
