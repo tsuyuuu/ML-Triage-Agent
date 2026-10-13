@@ -101,18 +101,20 @@ identified:
 
 ## Repository files
 
-| File | Description |
+| File or Folder | Description |
 |---|---|
-| `ML_Triage_Agent(1).ipynb` | Colab implementation, demonstration, and test cells |
-| `Windows_Enterprise_Environment.docx` | Required simulated environment input; include this supplied document |
-| `Assignment 3_ Build a Security Triage Agent.docx` | Design and tool descriptions |
-| `SMB Signing Triage Agent Workflow (FILE04) 1.pdf` | Workflow diagram |
-| `risk_assessment(1).json` | Saved example assessment |
-| `agent_baseline(1).json` | Saved prompt, model configuration, and tool execution history |
-| `microsoft_smb_guidance.json` | Retrieved Microsoft guidance passages |
+| `ML_Triage_Agent.ipynb` | Google Colab notebook containing the agent implementation, demonstration, and test cells |
+| `ml_triage_agent.py` | Python script version of the agent; Colab-specific functionality may require adaptation for local execution |
+| `Windows_Enterprise_Environment.docx` | Supplied fictional Northbridge Services environment used as input |
+| `TriageAgent WorkflowDiagram.pdf` | Workflow diagram showing tool execution, assessment, reporting, and analyst review |
+| `JSON/` | Saved assessment, baseline, and supporting evidence files |
+| `requirements.txt` | Python dependencies |
+| `README.md` | Project overview, setup instructions, rating policy, testing, and limitations |
+| `LICENSE` | Repository license |
 
-Fresh notebook runs generate `risk_assessment.json`,
-`tool_history.json`, and `agent_baseline.json`.
+Notebook runs generate `risk_assessment.json`, `tool_history.json`,
+`agent_baseline.json`, and `microsoft_smb_guidance.json` in the runtime’s
+working directory. Download and preserve the submission outputs in `JSON/`.
 
 ## Setup and execution (Google Colab)
 
@@ -136,7 +138,7 @@ Required packages include:
    !pip install -q langchain-ollama python-docx scikit-learn requests beautifulsoup4
    ```
 
-3. In **Colab → Secrets**, create a secret named `OLLAMA` with your Ollama Cloud API key and grant notebook access. **Never commit or print the key.**
+3. In **Colab → Secrets**, create a secret named `OLLAMA` with your Ollama Cloud API key and grant notebook access. This key should be taken from the free version of the Ollama API service. **Never commit or print the key.**
 4. Configure `ChatOllama` using model `gpt-oss:20b`, the Ollama Cloud endpoint, and the key loaded from Secrets. The API key is authenticated through the notebook's configured authorization header.
 5. Upload `Windows_Enterprise_Environment.docx` using `files.upload()` when prompted. Load the Microsoft guidance collection using the notebook's retrieval code (or the saved evidence snapshot, if the notebook is configured to read it).
 6. Run the cells defining the four tools, bind them to the LLM, and run the `run_agent(...)` cell for the FILE04 SMB question.
