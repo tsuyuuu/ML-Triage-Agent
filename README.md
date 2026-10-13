@@ -7,7 +7,7 @@ ML in Modern Cyber Operations at Duke University.
 ## Member Contributions
 Parker: Created workflow diagram, rag search function <br />
 Vamsee: Assisted with document creation, defining evaluation tables, wrote generate_report function <br />
-Jenessa: Wrote cisa_kev function, general guidance on how to move through project. <br />
+Jenessa: Wrote cisa_kev function, agent evaluation, tool evaluation. <br />
 Lalit: Assisted with document creation, wrote generate_report function. <br />
 
 Everyone: Wrote system prompt, came up with ideas for how to go about the project/writing overall code
