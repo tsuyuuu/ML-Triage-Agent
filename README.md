@@ -2,6 +2,8 @@
 AI Security Triage Agent built with Ollama Cloud for CYBERSEC590: 
 ML in Modern Cyber Operations at Duke University. 
 
+The video recording is in the Video Recording.md file.
+
 **Team:** Parker Cummins, Lalit Lakamsani, Jenessa Lu, Vamsee Vusuwandla
 
 ## Member Contributions
